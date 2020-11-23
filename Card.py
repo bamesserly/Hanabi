@@ -18,3 +18,7 @@ class Card:
 
     def GetCode(self):
         return str(self.GetSuit()) + str(self.GetValue())
+
+if __name__ == "__main__":
+    c = Card(18)
+    print(c.GetCode())
