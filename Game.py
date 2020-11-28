@@ -1,9 +1,12 @@
 from Card import Card
-from Deck import Deck
+from Deck import Deck, Discard
 from Player import Player
 
+
 class Game:
-    def __init__(self, n_players = 2):
+
+    def __init__(self, n_players=2):
+        print("Starting a new game.")
         self.over = False
         self.n_fuses = 3
         self.n_clocks = 8
@@ -11,11 +14,11 @@ class Game:
         self.players = []
         self.acting_player = 0
         for i in range(n_players):
-            self.players.append(Player(self))
-        self.piles = {}
+            self.players.append(Player(self, i))
+        self.piles = {suit: 0 for suit in Card.suits}
         for suit in Card.suits:
             self.piles[suit] = 0
-        self.discard = []
+        self.discard_pile = Discard()
         self.state = self.GetState()
 
     def GetActingPlayer(self):
@@ -23,7 +26,10 @@ class Game:
 
     def NextTurn(self):
         start_state = self.GetState()
-        self.GetActingPlayer().Act(self)
+        print("Player", self.acting_player + 1, "'s turn to act.")
+        print("Here's what they know about the game:")
+        print(self.GetState(self.acting_player))
+        self.GetActingPlayer().Act()
         self.over = self.CheckGameOver()
         self.acting_player = (self.acting_player + 1) % len(self.players)
         end_state = self.GetState()
@@ -39,16 +45,42 @@ class Game:
             return True
         return False
 
-    def GetState(self):
-        self.state = str(self.n_fuses) + str(self.n_clocks)
-        self.state += str(self.acting_player)
+    def GetScore(self):
+        return sum(self.piles.values())
+
+    def CardIsPlayable(self, card):
+        c = Card(card)
+        if self.piles[c.GetSuit()] + 1 == c.GetValue():
+            return True
+        else:
+            return False
+
+    # List of info. Ultimately want to join.
+    def GetState(self, player_idx=None):
+        self.state = []
+        self.state.append(str(self.n_fuses))
+        self.state.append(str(self.n_clocks))
+        self.state.append(str(self.acting_player))
         for key, val in self.piles.items():
-            self.state += key + str(val)
-        self.state += self.deck.GetCode()
-        for p in self.players:
-            self.state += p.hand.GetCode()
+            self.state.append(key + str(val))
+        for idx, p in enumerate(self.players):
+            if idx == player_idx:
+                self.state.append("")
+            else:
+                self.state.append(p.hand.GetCode())
+            self.state.append(p.knowledge)
+        if player_idx:
+            self.state.append("")
+        else:
+            self.state.append(self.deck.GetCode())
+        self.state.append(self.discard_pile.GetCode())
         return self.state
+
 
 if __name__ == "__main__":
     g = Game()
+    print("The game state encodes everything there is to know about the game:")
     print(g.GetState())
+    c_idx = 2
+    c = Card(c_idx)
+    print("A", c.GetCode(), "is playable?", g.CardIsPlayable(c_idx))

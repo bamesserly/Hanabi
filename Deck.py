@@ -1,43 +1,58 @@
+################################################################################
+# CardPiles are just lists of integers, and it is assumed that the integer has
+# a corresponding Card object, from which a code can be extracted.
+################################################################################
 from Card import Card
-from random import random
+import random
 
-class Deck:
-    n_cards = 50
+
+class CardPile:
 
     def __init__(self):
         self.cards = []
-        for i in range (self.n_cards):
-            self.cards.append(Card(i))
-        self.Shuffle()
-        self.next_card_idx = 0 # top card is 0th card
-
-    # TODO
-    def Shuffle(self):
-        pass
-        #for i in range(self.n_cards):
-        #    j = i + random() % (self.n_cards - i)
-        #    print(j)
-        #    j = int(j)
-        #    tmp = self.cards[i]
-        #    self.cards[i] = m_cards[j];
-        #    self.cards[j] = tmp
 
     def Size(self):
-        return self.n_cards - self.next_card_idx
-
-    def DealOneCard(self):
-        try:
-            assert self.next_card_idx in range(self.n_cards)
-            c = self.cards[self.next_card_idx]
-            self.next_card_idx += 1
-            return c
-        except AssertionError:
-            pass
+        return len(self.cards)
 
     def GetCode(self):
-        return "".join(c.GetCode() for c in self.cards[self.next_card_idx:self.n_cards])
+        return "".join(c.GetCode() for c in self.cards)
+
+
+class Discard(CardPile):
+
+    def __init__(self):
+        super().__init__()
+
+    def AddCard(self, c):
+        self.cards.insert(0, c)
+
+
+class Deck(CardPile):
+    n_cards = int(len(Card.suits) * len(Card.values))  # 50, for normal deck
+
+    def __init__(self):
+        super().__init__()
+        for i in range(self.n_cards):
+            self.cards.append(Card(i))
+        self.Shuffle()
+
+    def Shuffle(self):
+        random.shuffle(self.cards)
+
+    def DrawCard(self):
+        try:
+            c = self.cards.pop(0)
+            return c
+        except IndexError:
+            print("Deck::DrawCard: no more cards to draw")
+            return None
+
 
 if __name__ == "__main__":
-    d = Deck()
-    while d.Size() > 0:
-        print(d.DealOneCard().GetCode())
+    deck = Deck()
+    discard = Discard()
+    print(deck.GetCode())
+    while deck.Size() > 0:
+        c = deck.DrawCard()
+        discard.AddCard(c)
+        print(deck.GetCode(), " | ", discard.GetCode())

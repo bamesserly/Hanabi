@@ -1,3 +1,6 @@
+# A card is just an integer which uniquely maps to a (value, suit) pair.
+
+
 class Card:
     k1 = 1
     k2 = 2
@@ -8,16 +11,17 @@ class Card:
     suits = ["R", "W", "B", "G", "Y"]
 
     def __init__(self, idx):
-        self.idx = idx # 0 - 49
+        self.idx = idx  # 0 - 49
 
     def GetValue(self):
-        return self.values[int(self.idx%10)]
+        return self.values[int(self.idx % 10)]
 
     def GetSuit(self):
-        return self.suits[int(self.idx/10)]
+        return self.suits[int(self.idx / 10)]
 
     def GetCode(self):
         return str(self.GetSuit()) + str(self.GetValue())
+
 
 if __name__ == "__main__":
     c = Card(18)
