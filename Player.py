@@ -2,6 +2,7 @@ from Card import Card
 from Hand import Hand
 
 
+
 class Player:
 
     def __init__(self, game, idx):
@@ -47,7 +48,7 @@ class Player:
                 else:
                     print("Not a valid info choice.")
 
-            self.game.players[which_player].UpdateKnowledge(which_info)
+            self.game.players[which_player].AddKnowledge(which_info)
 
         # Discard
         elif which_action == "b":
@@ -64,6 +65,7 @@ class Player:
                 else:
                     print("Invalid card selection.")
             card = self.hand.ReplaceCard(which_card, self.game.deck)
+            self.ClearCardKnowledge(card)
             if self.game.CardIsPlayable(card.idx):
                 self.game.piles[card.GetSuit()] += 1
                 print("Successfully played a card! Nice!")
@@ -78,19 +80,28 @@ class Player:
                     "fuses remaining.",
                 )
 
+
     def DiscardAndDrawNew(self, card_idx):
-        # Remove discarded from hand and draw a new from deck
+        # Remove discarded card from hand and draw a new from deck
         old_card = self.hand.ReplaceCard(card_idx, self.game.deck)
+
+        # Reset your knowledge about this card
+        self.ClearCardKnowledge(old_card)
 
         # Add old card to discard pile
         self.game.discard_pile.AddCard(old_card)
 
-    def UpdateKnowledge(self, info):
+
+    # Add color or value info to your knowledge 
+    def AddKnowledge(self, info):
+        # loop your cards
         for idx, c in enumerate(self.hand.cards):
+            # info provided is a suit
             if info in Card.suits and info == c.GetSuit():
-                know = list(self.knowledge[idx])
+                know = list(self.knowledge[idx]) # e.g. ['Y', 5]
                 know[0] = info
                 self.knowledge[idx] = "".join(know)
+            # info provided is a value
             try:
                 if int(info) in Card.values and int(info) == c.GetValue():
                     know = list(self.knowledge[idx])
@@ -98,6 +109,12 @@ class Player:
                     self.knowledge[idx] = "".join(know)
             except ValueError:
                 pass
+
+
+    # Clear the knowledge of a specific card in your hand
+    def ClearCardKnowledge(self, which_card):
+        assert(isinstance(which_card, Card))
+        print("Clearing your knowledge of card", which_card.GetCode())
 
 
 if __name__ == "__main__":
