@@ -69,7 +69,7 @@ class Game:
             else:
                 self.state.append(p.hand.GetCode())
             self.state.append(p.knowledge)
-        if player_idx:
+        if player_idx is not None:
             self.state.append("")
         else:
             self.state.append(self.deck.GetCode())

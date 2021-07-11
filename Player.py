@@ -11,6 +11,7 @@ class Player:
         self.hand = Hand(self.game.deck)
         self.knowledge = {0: "XX", 1: "XX", 2: "XX", 3: "XX", 4: "XX"}
 
+
     def Act(self):
         # Choose to (a) give info, (b) discard, or (c) play
         while True:
@@ -26,18 +27,24 @@ class Player:
         # Give info
         if which_action == "a":
             self.game.n_clocks -= 1
-            while True:
-                which_player = (
-                    int(input("To which player would you like to give info?\n")) - 1
-                )
-                if (
-                    which_player in range(len(self.game.players))
-                    and which_player != self.idx
-                ):
-                    break
-                else:
-                    print("Cannot give information to this player.")
 
+            # Choose player
+            if len(self.game.players) == 2:
+                which_player = not int(self.idx)
+            else:
+                while True:
+                    which_player = (
+                        int(input("To which player would you like to give info?\n")) - 1
+                    )
+                    if (
+                        which_player in range(len(self.game.players))
+                        and which_player != self.idx
+                    ):
+                        break
+                    else:
+                        print("Cannot give information to this player.")
+
+            # Choose the info
             while True:
                 which_info = input(
                     "\nWhat info do you want to give to this player?\n Choose "
@@ -52,20 +59,16 @@ class Player:
 
         # Discard
         elif which_action == "b":
-            which_card = self.hand.PromptCardSelection()
+            which_card = self.hand.PromptCardSelection("discard")
+            self.ClearCardKnowledge(which_card)
             self.DiscardAndDrawNew(which_card)
             self.game.n_clocks += 1
 
         # Play
         elif which_action == "c":
-            while True:
-                which_card = int(input("Which card do you want to try to play?\n"))
-                if self.hand.cards[which_card]:
-                    break
-                else:
-                    print("Invalid card selection.")
+            which_card = self.hand.PromptCardSelection("play")
+            self.ClearCardKnowledge(which_card)
             card = self.hand.ReplaceCard(which_card, self.game.deck)
-            self.ClearCardKnowledge(card)
             if self.game.CardIsPlayable(card.idx):
                 self.game.piles[card.GetSuit()] += 1
                 print("Successfully played a card! Nice!")
@@ -84,9 +87,6 @@ class Player:
     def DiscardAndDrawNew(self, card_idx):
         # Remove discarded card from hand and draw a new from deck
         old_card = self.hand.ReplaceCard(card_idx, self.game.deck)
-
-        # Reset your knowledge about this card
-        self.ClearCardKnowledge(old_card)
 
         # Add old card to discard pile
         self.game.discard_pile.AddCard(old_card)
@@ -111,10 +111,11 @@ class Player:
                 pass
 
 
-    # Clear the knowledge of a specific card in your hand
+    # Clear the knowledge of a specific card in your hand (because you
+    # discarded or played it). Specify card by its index in your hand.
+    # self.knowledge = {0: "XX", 1: "XX", 2: "XX", 3: "XX", 4: "XX"}
     def ClearCardKnowledge(self, which_card):
-        assert(isinstance(which_card, Card))
-        print("Clearing your knowledge of card", which_card.GetCode())
+        self.knowledge[which_card] = "XX"
 
 
 if __name__ == "__main__":

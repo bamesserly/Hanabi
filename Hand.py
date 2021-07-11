@@ -30,9 +30,9 @@ class Hand:
     def HasValidCard(self, card_idx):
         return self.cards[card_idx] is not None
 
-    def PromptCardSelection(self):
+    def PromptCardSelection(self, play_or_discard = "play"):
         while True:
-            which_card = int(input("Select a card (specify 0-4)\n"))
+            which_card = int(input(f"Select a card (specify 0-4) to {play_or_discard}>\n"))
             if which_card in range(5):
                 try:
                     assert self.HasValidCard(which_card)
