@@ -1,3 +1,4 @@
 /envs
 /cpp
 **cache*
+*.ipynb
